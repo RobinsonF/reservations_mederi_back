@@ -1,0 +1,21 @@
+version: '3.3'
+
+services:
+  mysql:
+    image: mysql:9.0.0
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_PASSWORD: 1234
+      MYSQL_DATABASE: reservations_mederi
+    volumes:
+      - ./mysql_data:/var/lib/mysql/
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      PMA_HOST: mysql
+    ports:
+      - "8080:80"
