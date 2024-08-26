@@ -2,6 +2,8 @@ const boom = require('@hapi/boom');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+const fs = require('fs');
+const path = require('path');
 
 const { models } = require('../libs/sequelize');
 const { config } = require('../config/config');
@@ -71,12 +73,17 @@ class AuthService {
     const link = `http://localhost:4200/recovery?token=${token}`;
     await service.update(user.id, {
       recoveryToken: token
-    })
+    });
+    const htmlContent = await this.getEmailHtml('../templates/email.html', {
+      title: 'Email para recuperar contraseña',
+      userName: user.name,
+      text: `<b>Ingresa a este link: ${link} </b>`
+    });
     const mail = {
       from: config.emailAccount,
       to: `${user.email}`,
-      subject: 'Email para recuperar contraseña',
-      html: `<b>Ingresa a este link: ${link} </b>`
+      subject: 'Recuperar contraseña',
+      html: htmlContent
     }
     const rta = await this.sendMail(mail);
 
@@ -99,6 +106,14 @@ class AuthService {
     } catch (error) {
       throw boom.unauthorized();
     }
+  }
+
+  async getEmailHtml(templatePath, variables) {
+    const template = fs.readFileSync(path.join(__dirname, templatePath), 'utf8');
+    return Object.keys(variables).reduce((html, key) => {
+      const regex = new RegExp(`{{${key}}}`, 'g');
+      return html.replace(regex, variables[key]);
+    }, template);
   }
 
   async sendMail(infoMail) {

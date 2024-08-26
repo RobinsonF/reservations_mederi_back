@@ -1,6 +1,7 @@
 const boom = require('@hapi/boom');
 const { models } = require('../libs/sequelize');
 const { Op } = require('sequelize');
+const { format } = require('date-fns');
 
 const AuthService = require('./auth.service');
 const UsersService = require('./user.service');
@@ -49,13 +50,20 @@ class ReservationsService {
 
     const reservation = await this.findOne(newReservation.dataValues.id);
 
+    const formattedStartTime = format(reservation.startTime, 'dd/MM/yyyy HH:mm');
+    const formattedEndTime = format(reservation.endTime, 'dd/MM/yyyy HH:mm');
+
+    const htmlContent = await service.getEmailHtml('../templates/email.html', {
+      title: 'Reservación creada',
+      userName: reservation.user.name,
+      text: `Tu reservación para la sala <b>${reservation.room.name}</b> ha sido creada para el  ${formattedStartTime} a  ${formattedEndTime}.`
+    });
+
     const mail = {
       from: config.emailAccount,
       to: `${reservation.user.email}`,
       subject: 'Reservación creada',
-      html: `<b>Tu reservación para la sala ${reservation.room.name}
-      ha sido creada de ${reservation.startTime} a ${reservation.endTime}.
-      </b>`
+      html: htmlContent
     }
     await service.sendMail(mail);
 
@@ -141,38 +149,52 @@ class ReservationsService {
     const updatedReservation = await reservation.update(data);
     const reservationUpdated = await this.findOne(updatedReservation.dataValues.id);
 
+    const formattedStartTime = format(reservationUpdated.startTime, 'dd/MM/yyyy HH:mm');
+    const formattedEndTime = format(reservationUpdated.endTime, 'dd/MM/yyyy HH:mm');
+
+
     if (status && status === 'C') {
+      const htmlContent = await service.getEmailHtml('../templates/email.html', {
+        title: 'Reservación cancelada',
+        userName: reservationUpdated.user.name,
+        text: `Tu reservación para la sala <b>${reservationUpdated.room.name}</b> ha sido cancelada.`
+      });
       const mail = {
         from: config.emailAccount,
         to: `${reservationUpdated.user.email}`,
         subject: 'Reservación cancelada',
-        html: `<b>Tu reservación para la sala ${reservationUpdated.room.name}
-        ha sido cancelada.
-        </b>`
+        html: htmlContent
       }
       await service.sendMail(mail);
 
       const userAvailable = await serviceUser.findRoleAndNotId('user', reservationUpdated.user.id);
       const toList = userAvailable.map(user => user.email).join(',');
 
+      const htmlContentAvailable = await service.getEmailHtml('../templates/email.html', {
+        title: `Sala ${reservationUpdated.room.name} ha sido liberada`,
+        userName: reservationUpdated.user.name,
+        text: `La sala <b>${reservation.room.name}</b> se encuentra disponible en el horario de  ${formattedStartTime} a  ${formattedEndTime}.`
+      });
+
       const mailAvailable = {
         from: config.emailAccount,
         to: toList,
         subject: `Sala ${reservationUpdated.room.name} ha sido liberada`,
-        html: `<b>La sala ${reservationUpdated.room.name} se encuentra disponible en
-        el horario de ${reservationUpdated.startTime} a ${reservationUpdated.endTime}.
-        </b>`
+        html: htmlContentAvailable
       }
       await service.sendMail(mailAvailable);
 
     } else {
+      const htmlContent = await service.getEmailHtml('../templates/email.html', {
+        title: 'Reservación actualizada',
+        userName: reservationUpdated.user.name,
+        text: `Tu reservación para la sala <b>${reservation.room.name}</b> ha sido actualizada para el  ${formattedStartTime} a  ${formattedEndTime}.`
+      });
       const mail = {
         from: config.emailAccount,
         to: `${reservationUpdated.user.email}`,
         subject: 'Reservación actualizada',
-        html: `<b>Tu reservación para la sala ${reservationUpdated.room.name}
-        ha sido actualizada de ${reservationUpdated.startTime} a ${reservationUpdated.endTime}.
-        </b>`
+        html: htmlContent
       }
       await service.sendMail(mail);
     }
