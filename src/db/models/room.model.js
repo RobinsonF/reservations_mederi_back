@@ -41,10 +41,12 @@ class Room extends Model {
       as: 'reservations',
       foreignKey: 'roomId'
     });
-    this.hasMany(models.RoomEquipment, {
-      as: 'roomEquipment',
-      foreignKey: 'roomId'
-    });
+    this.belongsToMany(models.Equipment, {
+      as: 'equipment',
+      through: models.RoomEquipment,
+      foreignKey: 'roomId',
+      otherKey: 'equipmentId'
+    })
   }
 
   static config(sequelize) {

@@ -13,12 +13,22 @@ class EquipmentService {
   }
 
   async findAll() {
-    const rta = await models.Equipment.findAll();
+    const rta = await models.Equipment.findAll({
+      where: {
+        active: true
+      }
+    });
     return rta;
   }
 
   async findOne(id) {
-    const equipment = await models.Equipment.findByPk(id);
+    const equipment = await models.Equipment.findOne({
+      where: {
+        id: id,
+        active: true
+      },
+      include: ['roomEquipment']
+    });
     if(!equipment){
       throw boom.notFound('Equipment not found');
     }
@@ -33,6 +43,9 @@ class EquipmentService {
 
   async delete(id) {
     const equipment = await this.findOne(id);
+    if (equipment.roomEquipment.length !== 0) {
+      throw boom.conflict('Cannot delete the equipment because it has pending room equipment associated');
+    }
     const deletedEquipment = await equipment.update({active: false});
     return deletedEquipment;
   }

@@ -6,10 +6,20 @@ const USER = encodeURIComponent(config.dbUser);
 const PASSWORD = encodeURIComponent(config.dbPassword);
 const URI = `mysql://${USER}:${PASSWORD}@${config.dbHost}:${config.dbPort}/${config.dbName}`;
 
-const sequelize = new Sequelize(URI, {
-  dialect: 'mysql',
-  logging: true
-});
+const options = {
+  dialect: 'postgres',
+  logging: config.isProd ? false : true,
+}
+
+if (config.isProd) {
+  options.dialectOptions = {
+    ssl: {
+      rejectUnauthorized: false
+    }
+  }
+}
+
+const sequelize = new Sequelize(URI, options);
 
 setupModels(sequelize);
 

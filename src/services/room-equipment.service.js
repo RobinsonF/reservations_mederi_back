@@ -8,6 +8,10 @@ class RoomEquipmentService {
   }
 
   async create(data) {
+    const isRegister = await this.findByRoomIdAndEquipmentId(data.roomId, data.equipmentId);
+    if (isRegister) {
+      throw boom.conflict('The resource is already registered');
+    }
     const newRoomEquipment = await models.RoomEquipment.create(data);
     return newRoomEquipment;
   }
@@ -21,22 +25,38 @@ class RoomEquipmentService {
 
   async findOne(id) {
     const roomEquipment = await models.RoomEquipment.findByPk(id);
-    if(!roomEquipment){
+    if (!roomEquipment) {
       throw boom.notFound('Room equipment not found');
     }
     return roomEquipment;
   }
 
+  async findByRoomIdAndEquipmentId(roomId, equipmentId) {
+    const roomEquipment = await models.RoomEquipment.findOne({
+      where: {
+        roomId: roomId,
+        equipmentId: equipmentId
+      }
+    });
+    return roomEquipment;
+  }
+
   async update(id, data) {
     const roomEquipment = await this.findOne(id);
+    if(data.roomId && data.equipmentId){
+      const isRegister = await this.findByRoomIdAndEquipmentId(data.roomId, data.equipmentId);
+      if (isRegister) {
+        throw boom.conflict('The resource is already registered');
+      }
+    }
     const updatedRoomEquipment = await roomEquipment.update(data);
     return updatedRoomEquipment;
   }
 
   async delete(id) {
     const roomEquipment = await this.findOne(id);
-    const deletedRoomEquipment = await roomEquipment.update({active: false});
-    return deletedRoomEquipment;
+    await roomEquipment.destroy();
+    return roomEquipment;
   }
 }
 

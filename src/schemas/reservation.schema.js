@@ -7,7 +7,10 @@ const startTime = Joi.date();
 const endTime = Joi.date();
 const purpose = Joi.string();
 const status = Joi.string();
-const active = Joi.number().min(0).max(1);
+const active = Joi.boolean();
+
+const limit = Joi.number().integer();
+const offset = Joi.number().integer();
 
 const createReservationSchema = Joi.object({
   roomId: roomId.required(),
@@ -33,4 +36,9 @@ const getReservationSchema = Joi.object({
   id: id.required()
 });
 
-module.exports = { createReservationSchema, updateReservationSchema, getReservationSchema }
+const queryReservationSchema = Joi.object({
+  limit: limit,
+  offset: offset
+});
+
+module.exports = { createReservationSchema, updateReservationSchema, getReservationSchema, queryReservationSchema }
