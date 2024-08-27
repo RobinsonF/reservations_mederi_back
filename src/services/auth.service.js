@@ -54,7 +54,7 @@ class AuthService {
       sub: user.id,
       role: user.role
     }
-    const token = jwt.sign(payload, config.jwtSecret);
+    const token = jwt.sign(payload, config.jwtSecret, { expiresIn: '6h' });
     return {
       user,
       token
@@ -94,7 +94,7 @@ class AuthService {
     try {
       const payload = jwt.verify(token, config.jwtSecret);
       const user = await service.findOne(payload.sub);
-      if (user.recoveryToken !== token) {
+      if (user.dataValues.recoveryToken !== token) {
         throw boom.unauthorized();
       }
       const hash = await bcrypt.hash(newPassword, 10);

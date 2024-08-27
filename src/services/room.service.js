@@ -16,7 +16,17 @@ class RoomsService {
     const rta = await models.Room.findAll({
       where: {
         active: true
-      }
+      },
+      include: [
+        {
+          association: 'reservations',
+          where: {
+            active: true,
+            status: 'A'
+          },
+          required: false,
+        }
+      ]
     });
     return rta;
   }

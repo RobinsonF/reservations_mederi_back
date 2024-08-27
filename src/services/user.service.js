@@ -56,7 +56,7 @@ class UsersService {
         id: id,
         active: true
       },
-      attributes: { exclude: ['password', 'recoveryToken'] },
+      attributes: { exclude: ['password'] },
       include: [{
         association: 'reservations',
         where: {
