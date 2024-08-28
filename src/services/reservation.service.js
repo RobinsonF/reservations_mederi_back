@@ -67,7 +67,7 @@ class ReservationsService {
     }
     await service.sendMail(mail);
 
-    return newReservation;
+    return reservation;
   }
 
   async findAll(query) {
@@ -198,7 +198,7 @@ class ReservationsService {
       }
       await service.sendMail(mail);
     }
-    return updatedReservation;
+    return reservationUpdated;
 
   }
 

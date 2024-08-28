@@ -24,7 +24,7 @@ router.get('/',
 
 router.get('/:id',
   passport.authenticate('jwt', { session: false }),
-  checkRoles('admin'),
+  checkRoles('admin', 'user'),
   validatorHandler(getUserSchema, 'params'), async (req, res, next) => {
     try {
       const { id } = req.params;

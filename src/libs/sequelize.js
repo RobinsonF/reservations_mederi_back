@@ -9,6 +9,7 @@ const URI = `mysql://${USER}:${PASSWORD}@${config.dbHost}:${config.dbPort}/${con
 const options = {
   dialect: 'postgres',
   logging: config.isProd ? false : true,
+  timezone: 'America/Bogota'
 }
 
 if (config.isProd) {
