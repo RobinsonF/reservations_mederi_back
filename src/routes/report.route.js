@@ -37,7 +37,7 @@ router.get('/dailyReport',
   checkRoles('admin'),
   async (req, res, next) => {
     try {
-      const dailyReport = await service.frequencyReport();
+      const dailyReport = await service.dailyReport();
       res.json(formatResponse(true, dailyReport, "dailyReport"));
     } catch (error) {
       next(error);

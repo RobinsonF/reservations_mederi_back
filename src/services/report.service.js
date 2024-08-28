@@ -33,15 +33,11 @@ class ReportsService {
     const hoursReport = await models.Reservation.findAll({
       attributes: [
         'roomId',
-        [Sequelize.fn('SUM', Sequelize.literal('TIMESTAMPDIFF(HOUR, startTime, endTime)')), 'totalHours']
+        [fn('SUM', literal('TIMESTAMPDIFF(HOUR, start_time, end_time)')), 'totalHours']
       ],
       group: ['roomId'],
       where: {
         active: true,
-        status: 'A',
-        createdAt: {
-          [Op.between]: [startDate, endDate]
-        }
       },
       include: [
         {
@@ -61,16 +57,13 @@ class ReportsService {
     const dailyReport = await models.Reservation.findAll({
       attributes: [
         'roomId',
-        [Sequelize.fn('SUM', Sequelize.literal('TIMESTAMPDIFF(HOUR, startTime, endTime)')), 'totalHours'],
-        [Sequelize.fn('DATE', Sequelize.col('startTime')), 'reservationDate']
+        [fn('SUM', literal('TIMESTAMPDIFF(HOUR, start_time, end_time)')), 'totalHours'],
+        [fn('DATE', col('start_time')), 'reservationDate']
       ],
       group: ['roomId', 'reservationDate'],
       where: {
         active: true,
-        status: 'A',
-        startTime: {
-          [Op.between]: [startDate, endDate]
-        }
+
       },
       include: [
         {
